@@ -1,22 +1,20 @@
 #pragma once
 
-#include "Config.hpp"
-#include <Geode/loader/Log.hpp>
-#include <Geode/loader/Types.hpp>
-#include <filesystem>
-#include <minwindef.h>
-#include <processthreadsapi.h>
-#include <string>
-#include <asp/time/SystemTime.hpp>
+#include <Geode/Geode.hpp>
+
+using namespace geode::prelude;
 
 namespace sobriety::utils {
 
-    static auto convertTime(auto timePoint) {
-        auto timeEpoch = std::chrono::system_clock::to_time_t(timePoint);
-        return asp::localtime(timeEpoch);
-    }
+    template<class T>
+    struct Singleton {
+        static T* get() {
+            static T instance;
+            return &instance;
+        }
+    };
 
-    static geode::Severity fromString(std::string_view severity) {
+    inline geode::Severity fromString(std::string_view severity) {
         if (severity == "debug") return geode::Severity::Debug;
         if (severity == "info") return geode::Severity::Info;
         if (severity == "warning") return geode::Severity::Warning;
@@ -24,98 +22,88 @@ namespace sobriety::utils {
         return geode::Severity::Info;
     }
 
-    static void createTempDir() {
-        auto path = Config::get()->getUniquePath();
-        if (!std::filesystem::exists(path)) {
-            auto tmpDirRes = geode::utils::file::createDirectoryAll(path);
-            if (!tmpDirRes) return geode::log::error("Failed to create {} directory", path);
-        }
+    inline geode::Severity getConsoleLogLevel() {
+        static auto geode = geode::Loader::get()->getLoadedMod("geode.loader");
+        static auto setting = fromString(geode->getSettingValue<std::string>("console-log-level"));
+        static auto listener = listenForSettingChanges<std::string>("console-log-level", [](std::string value) {
+            setting = fromString(value);
+        }, geode);
+
+        return setting;
     }
 
-    static void runCommand(const std::string& cmd) {
-        STARTUPINFOA si{};
-        PROCESS_INFORMATION pi{};
+    inline bool shouldLogMillisconds() {
+        static auto geode = geode::Loader::get()->getLoadedMod("geode.loader");
+        static auto setting = geode->getSettingValue<bool>("log-milliseconds");
+        static auto listener = listenForSettingChanges<bool>("log-milliseconds", [](bool value) {
+            setting = value;
+        }, geode);
 
-        si.cb = sizeof(si);
-        si.dwFlags = STARTF_USESHOWWINDOW;
-        si.wShowWindow = SW_HIDE;
-
-        if (!CreateProcessA(
-                nullptr,
-                const_cast<char*>(cmd.c_str()),
-                nullptr, nullptr,
-                FALSE,
-                CREATE_NO_WINDOW,
-                nullptr,
-                nullptr,
-                &si,
-                &pi
-            )) {
-        } else {
-            CloseHandle(pi.hProcess);
-            CloseHandle(pi.hThread);
-        }
+        return setting;
     }
 
-    static bool isWine() {
-        static bool wine = [] -> bool {
-            HMODULE hModule = GetModuleHandleA("ntdll.dll");
-            if (!hModule) return false;
-            FARPROC func = GetProcAddress(hModule, "wine_get_version");
-            if (!func) return false;
-            return true;
-        }();
-        
-        return wine;
+    inline int getFontSize() {
+        static auto setting = geode::Mod::get()->getSettingValue<int>("console-font-size");
+        return setting;
     }
 
-    /*
-        So this originally returned std::filesystem::path, but wine hijacks that and will turn my converted patch *BACK* into
-        the path I passed in like some nerd, so I build it as a string instead.
-    */
-    static std::string wineToLinuxPath(const std::filesystem::path& winPath) {
-        std::string s = geode::utils::string::pathToString(winPath);
+    inline cocos2d::ccColor3B getConsoleForegroundColor(std::function<void()> callback) {
+        static auto setting = geode::Mod::get()->getSettingValue<cocos2d::ccColor3B>("console-foreground-color");
+        static auto listener = geode::listenForSettingChanges<cocos2d::ccColor3B>("console-foreground-color", [callback = std::move(callback)](ccColor3B value) {
+            setting = value;
+            if (callback) callback();
+        });
+        return setting;
+    }
 
-        if (s.size() < 2 || s[1] != ':')
-            return s;
+    inline cocos2d::ccColor3B getConsoleBackgroundColor(std::function<void()> callback) {
+        static auto setting = geode::Mod::get()->getSettingValue<cocos2d::ccColor3B>("console-background-color");
+        static auto listener = geode::listenForSettingChanges<cocos2d::ccColor3B>("console-background-color", [callback = std::move(callback)](ccColor3B value) {
+            setting = value;
+            if (callback) callback();
+        });
+        return setting;
+    }
 
-        char drive = std::tolower(s[0]);
-        std::string rest = s.substr(2);
-        for (auto& c : rest) if (c == '\\') c = '/';
+    inline cocos2d::ccColor3B getLogInfoColor(std::function<void()> callback) {
+        static auto setting = geode::Mod::get()->getSettingValue<cocos2d::ccColor3B>("console-log-info-color");
+        static auto listener = geode::listenForSettingChanges<ccColor3B>("console-log-info-color", [callback = std::move(callback)](ccColor3B value) {
+            setting = value;
+            if (callback) callback();
+        });
+        return setting;
+    }
 
-        const char* prefixEnv = std::getenv("WINEPREFIX");
-        const char* homeEnv = std::getenv("HOME");
+    inline cocos2d::ccColor3B getLogWarnColor(std::function<void()> callback) {
+        static auto setting = geode::Mod::get()->getSettingValue<cocos2d::ccColor3B>("console-log-warn-color");
+        static auto listener = geode::listenForSettingChanges<cocos2d::ccColor3B>("console-log-warn-color", [callback = std::move(callback)](cocos2d::ccColor3B value) {
+            setting = value;
+            if (callback) callback();
+        });
+        return setting;
+    }
 
-        std::string prefix;
-        if (prefixEnv) {
-            prefix = prefixEnv;
-        } else if (homeEnv) {
-            prefix = std::string(homeEnv) + "/.wine";
-        } else {
-            prefix = "/.wine";
-        }
+    inline cocos2d::ccColor3B getLogErrorColor(std::function<void()> callback) {
+        static auto setting = geode::Mod::get()->getSettingValue<cocos2d::ccColor3B>("console-log-error-color");
+        static auto listener = geode::listenForSettingChanges<cocos2d::ccColor3B>("console-log-error-color", [callback = std::move(callback)](cocos2d::ccColor3B value) {
+            setting = value;
+            if (callback) callback();
+        });
+        return setting;
+    }
 
-        std::string drivePath;
+    inline cocos2d::ccColor3B getLogDebugColor(std::function<void()> callback) {
+        static auto setting = geode::Mod::get()->getSettingValue<cocos2d::ccColor3B>("console-log-debug-color");
+        static auto listener = geode::listenForSettingChanges<cocos2d::ccColor3B>("console-log-debug-color", [callback = std::move(callback)](cocos2d::ccColor3B value) {
+            setting = value;
+            if (callback) callback();
+        });
+        return setting;
+    }
 
-        if (drive == 'z') {
-            drivePath = "/";
-        } else {
-            drivePath = prefix + "/drive_" + drive;
-        }
-
-        std::string fullPath = drivePath;
-        size_t start = 0;
-        while (start < rest.size()) {
-            size_t end = rest.find('/', start);
-            if (end == std::string::npos) end = rest.size();
-            std::string part = rest.substr(start, end - start);
-            if (!part.empty()) {
-                if (fullPath.back() != '/') fullPath += "/";
-                fullPath += part;
-            }
-            start = end + 1;
-        }
-
-        return fullPath;
+    inline bool hasConsole() {
+        static auto geode = geode::Loader::get()->getLoadedMod("geode.loader");
+        static bool setting = geode->getSettingValue<bool>("show-platform-console");
+        return setting;
     }
 }

@@ -1,10 +1,16 @@
 #pragma once
 
-#include <Geode/ui/Popup.hpp>
+#include <Geode/Geode.hpp>
+
+using namespace geode::prelude;
 
 class WaitingPopup : public geode::Popup {
 public:
-    static WaitingPopup* create();
+    static WaitingPopup* create(const std::string& text);
 protected:
-    bool init();
+    bool init(const std::string& text);
+
+    void keyBackClicked() override;
+    void keyDown(cocos2d::enumKeyCodes key, double p1) override;
+    void onClose(CCObject*) override;
 };

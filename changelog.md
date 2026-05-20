@@ -1,3 +1,9 @@
+# 1.0.0-beta.9
+- Now works on Proton 11
+- Switch to a different bridge method
+  - Cleaner, faster, less bugs
+- Remove disclaimer
+
 # 1.0.0-beta.8
 - Add disclaimer
 
