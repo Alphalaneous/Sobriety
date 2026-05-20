@@ -244,12 +244,12 @@ void SoberManager::setConsoleColors() {
 
 void SoberManager::startLogger() {
     if (!sobriety::utils::hasConsole()) return;
-    
+
     createTempDir();
     FreeConsole();
     
     auto logPath = fmt::format("/tmp/{}/console.ansi", Mod::get()->getID());
-    auto res = geode::utils::file::writeString(logPath, "");
+    
     m_logAppender = std::make_shared<FileAppender>(logPath);
 
     log::LogEvent().listen([this] (log::BorrowedLog const& log) {

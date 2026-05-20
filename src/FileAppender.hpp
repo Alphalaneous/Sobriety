@@ -8,8 +8,14 @@
 class FileAppender {
 public:
     FileAppender(const std::filesystem::path& path) {
-        std::lock_guard lock(m_mtx);
-        m_ofs.open(path, std::ios::out | std::ios::app);
+        if (path.has_parent_path()) {
+            std::filesystem::create_directories(path.parent_path());
+        }
+
+        m_ofs.open(path, std::ios::out | std::ios::trunc);
+        if (!m_ofs) {
+            geode::log::error("Failed to open file: {}", path.string());
+        }
     }
 
     ~FileAppender() {
