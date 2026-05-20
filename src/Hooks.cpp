@@ -1,4 +1,5 @@
 #include "SoberManager.hpp"
+#include "Utils.hpp"
 #include <Geode/Geode.hpp>
 
 using namespace geode::prelude;
@@ -51,19 +52,21 @@ bool file_openFolder_h(const std::filesystem::path& path) {
 }
 
 $on_mod(Loaded) {
-    (void) Mod::get()->hook(
-        reinterpret_cast<void*>(addresser::getNonVirtual(&utils::file::pick)),
-        &file_pick_h,
-        "utils::file::pick"
-    );
-    (void) Mod::get()->hook(
-        reinterpret_cast<void*>(addresser::getNonVirtual(&utils::file::pickMany)),
-        &file_pickMany_h,
-        "utils::file::pickMany"
-    );
-    (void) Mod::get()->hook(
-        reinterpret_cast<void*>(addresser::getNonVirtual(&utils::file::openFolder)),
-        &file_openFolder_h,
-        "utils::file::openFolder"
-    );
+    if (sobriety::utils::isWine()) {
+        (void) Mod::get()->hook(
+            reinterpret_cast<void*>(addresser::getNonVirtual(&utils::file::pick)),
+            &file_pick_h,
+            "utils::file::pick"
+        );
+        (void) Mod::get()->hook(
+            reinterpret_cast<void*>(addresser::getNonVirtual(&utils::file::pickMany)),
+            &file_pickMany_h,
+            "utils::file::pickMany"
+        );
+        (void) Mod::get()->hook(
+            reinterpret_cast<void*>(addresser::getNonVirtual(&utils::file::openFolder)),
+            &file_openFolder_h,
+            "utils::file::openFolder"
+        );
+    }
 }

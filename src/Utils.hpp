@@ -106,4 +106,16 @@ namespace sobriety::utils {
         static bool setting = geode->getSettingValue<bool>("show-platform-console");
         return setting;
     }
+
+    inline bool isWine() {
+        static bool wine = [] -> bool {
+            HMODULE hModule = GetModuleHandleA("ntdll.dll");
+            if (!hModule) return false;
+            FARPROC func = GetProcAddress(hModule, "wine_get_version");
+            if (!func) return false;
+            return true;
+        }();
+        
+        return wine;
+    }
 }

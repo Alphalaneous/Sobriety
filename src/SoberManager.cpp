@@ -39,18 +39,6 @@ void SoberManager::runCommand(const std::string& cmd) {
     }
 }
 
-bool SoberManager::isWine() {
-    static bool wine = [] -> bool {
-        HMODULE hModule = GetModuleHandleA("ntdll.dll");
-        if (!hModule) return false;
-        FARPROC func = GetProcAddress(hModule, "wine_get_version");
-        if (!func) return false;
-        return true;
-    }();
-    
-    return wine;
-}
-
 void SoberManager::createTempDir() {
     auto path = fmt::format("/tmp/{}", Mod::get()->getID());
 
