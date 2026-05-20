@@ -36,6 +36,7 @@ void Server::sendMessage(const std::string& str) {
 }
 
 void Server::close() {
+    if (m_closeCalled) return;
     matjson::Value value;
     value["type"] = "close";
     sendMessage(value.dump());
@@ -51,6 +52,7 @@ void Server::onMessage(const std::string& str) {
     auto message = json["message"].asString().unwrapOrDefault();
 
     if (type == "close") {
+        m_closeCalled = true;
         utils::game::exit(false);
     }
     else if (type == "info") {

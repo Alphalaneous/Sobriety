@@ -12,5 +12,6 @@ public:
 protected:
     void onMessage(const std::string& str);
 
+    bool m_closeCalled;
     std::shared_ptr<ix::WebSocketServer> m_server;
 };
