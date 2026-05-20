@@ -51,11 +51,6 @@ void SoberManager::createTempDir() {
 void SoberManager::startScript() {
     createTempDir();
 
-    if (sobriety::utils::hasConsole()) {
-        FreeConsole();
-        startLogger();
-    }
-
     auto modID = Mod::get()->getID();
 
     // .exe extension required for wine to launch it without it itself being marked executable
@@ -248,6 +243,11 @@ void SoberManager::setConsoleColors() {
 }
 
 void SoberManager::startLogger() {
+    if (!sobriety::utils::hasConsole()) return;
+    
+    createTempDir();
+    FreeConsole();
+    
     auto logPath = fmt::format("/tmp/{}/console.ansi", Mod::get()->getID());
     auto res = geode::utils::file::writeString(logPath, "");
     m_logAppender = std::make_shared<FileAppender>(logPath);

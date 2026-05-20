@@ -13,6 +13,7 @@ $on_game(Exiting) {
 
 $on_mod(Loaded) {
     if (sobriety::utils::isWine()) {
+        SoberManager::get()->startLogger();
         Server::get()->startServer();
         SoberManager::get()->startScript();
     }
