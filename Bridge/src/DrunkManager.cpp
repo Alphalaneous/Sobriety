@@ -74,6 +74,10 @@ void DrunkManager::onFileCancelled(const std::string& id) {
 void DrunkManager::openConsole(const std::string& directory, int fontSize) {
     if (m_consoleOpen) return;
 
+    if (system("which xterm > /dev/null 2>&1") != 0) {
+        return;
+    }
+
     pid_t pid = fork();
 
     if (pid == -1) {
@@ -105,7 +109,6 @@ void DrunkManager::openConsole(const std::string& directory, int fontSize) {
         _exit(1);
     }
 
-    m_xtermPid = pid;
     m_consoleOpen = true;
 
     std::thread([this, pid]() {

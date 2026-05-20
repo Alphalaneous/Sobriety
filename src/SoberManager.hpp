@@ -11,7 +11,6 @@ class SoberManager : public sobriety::utils::Singleton<SoberManager> {
 public:
     void startScript();
     std::string getLinuxPath(std::string_view path);
-    bool isWine();
 
     void pickFile(const std::string& startPath, geode::utils::file::PickMode mode, bool isMultiple, const std::vector<geode::utils::file::FilePickOptions::Filter>& filters);
     void onFilePicked(const std::vector<std::string>& items);

@@ -50,6 +50,12 @@ void SoberManager::createTempDir() {
 
 void SoberManager::startScript() {
     createTempDir();
+
+    if (sobriety::utils::hasConsole()) {
+        FreeConsole();
+        startLogger();
+    }
+
     auto modID = Mod::get()->getID();
 
     // .exe extension required for wine to launch it without it itself being marked executable
@@ -81,11 +87,6 @@ echo "exit_code=$?"
     auto saveDir = getLinuxPath(utils::string::pathToString(Mod::get()->getSaveDir()));
 
     runCommand(fmt::format("\"{}\" \"{}\" \"{}\"", bridgeStartDir, bridgeDir, saveDir));
-
-    if (sobriety::utils::hasConsole()) {
-        FreeConsole();
-        startLogger();
-    }
 }
 
 std::string SoberManager::generateExtensionString(std::vector<utils::file::FilePickOptions::Filter> filters) {

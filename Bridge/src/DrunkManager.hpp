@@ -26,5 +26,4 @@ protected:
     std::unordered_map<std::string, std::shared_ptr<FilePicker>> m_filePickers;
 
     bool m_consoleOpen = false;
-    pid_t m_xtermPid;
 };
