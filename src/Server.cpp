@@ -97,6 +97,8 @@ void Server::onMessage(const std::string& str) {
         }
     }
     else if (type == "connected") {
+        if (!sobriety::utils::hasConsole()) return;
+
         auto logPath = fmt::format("/tmp/{}/console.ansi", Mod::get()->getID());
         
         matjson::Value json;

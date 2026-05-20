@@ -1,3 +1,6 @@
+# 1.0.0-beta.10
+- Fix a bug where the platform console shows when it shouldn't
+
 # 1.0.0-beta.9
 - Now works on Proton 11
 - Switch to a different bridge method
