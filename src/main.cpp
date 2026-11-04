@@ -1,4 +1,5 @@
 #include <Geode/Geode.hpp>
+#include <Geode/binding/LocalLevelManager.hpp>
 #include "Server.hpp"
 #include "SoberManager.hpp"
 #include "Utils.hpp"

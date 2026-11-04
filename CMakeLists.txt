@@ -25,6 +25,7 @@ CPMAddPackage("gh:machinezone/IXWebSocket#v11.4.6")
 
 add_library(${PROJECT_NAME} SHARED ${SOURCES})
 
+target_link_libraries(${PROJECT_NAME} comdlg32)
 target_link_libraries(${PROJECT_NAME} ixwebsocket)
 
 setup_geode_mod(${PROJECT_NAME})

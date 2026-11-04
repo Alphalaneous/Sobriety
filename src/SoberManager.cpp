@@ -1,5 +1,8 @@
 #include "SoberManager.hpp"
 #include <Geode/Geode.hpp>
+#include <asp/fs/Path.hpp>
+#include <asp/fs/fs.hpp>
+#include "Geode/utils/ZStringView.hpp"
 #include "Utils.hpp"
 #include "WaitingPopup.hpp"
 #include "Server.hpp"
@@ -42,7 +45,7 @@ void SoberManager::runCommand(const std::string& cmd) {
 void SoberManager::createTempDir() {
     auto path = fmt::format("/tmp/{}", Mod::get()->getID());
 
-    if (!std::filesystem::exists(path)) {
+    if (!asp::fs::exists(path)) {
         auto tmpDirRes = utils::file::createDirectoryAll(path);
         if (!tmpDirRes) return log::error("Failed to create {} directory", path);
     }
@@ -79,12 +82,12 @@ echo "exit_code=$?"
     if (!res) log::error("failed to write starter script");
 
     auto bridgeDir = getLinuxPath(fmt::format("geode\\unzipped\\{}\\resources\\{}\\bridge", modID, modID));
-    auto saveDir = getLinuxPath(utils::string::pathToString(Mod::get()->getSaveDir()));
+    auto saveDir = getLinuxPath(Mod::get()->getSaveDir().string());
 
     runCommand(fmt::format("\"{}\" \"{}\" \"{}\"", bridgeStartDir, bridgeDir, saveDir));
 }
 
-std::string SoberManager::generateExtensionString(std::vector<utils::file::FilePickOptions::Filter> filters) {
+std::string SoberManager::generateExtensionString(std::vector<utils::file::FilePickOptions::Filter> filters, bool addAllFiles) {
     utils::StringBuffer<> filterString;
 
     bool firstFilter = true;
@@ -111,12 +114,14 @@ std::string SoberManager::generateExtensionString(std::vector<utils::file::FileP
         filterString.append(";");
     }
 
-    filterString.append("All Files:*");
+    if (addAllFiles) {
+        filterString.append("All Files:*");
+    }
 
     return filterString.str();
 }
 
-void SoberManager::pickFile(const std::string& startPath, file::PickMode mode, bool isMultiple, const std::vector<utils::file::FilePickOptions::Filter>& filters) {
+void SoberManager::pickFile(const std::string& startPath, file::PickMode mode, bool isMultiple, const std::vector<utils::file::FilePickOptions::Filter>& filters, bool addAllFiles, ZStringView title) {
     auto id = fmt::format("alphalaneous_sobriety_{}", m_id);
     m_id++;
     m_pickerMode = mode;
@@ -127,28 +132,28 @@ void SoberManager::pickFile(const std::string& startPath, file::PickMode mode, b
     json["id"] = id;
 
     if (mode == file::PickMode::OpenFolder) {
-        json["title"] = "Select a folder";
+        json["title"] = title.empty() ? "Select a folder" : title;
         json["isDirectory"] = true;
         json["action"] = "pick";
     }
     else if (mode == file::PickMode::OpenFile){
         if (isMultiple) {
-            json["title"] = "Select files";
+            json["title"] = title.empty() ? "Select files" : title;
         }
         else {
-            json["title"] = "Select a file";
+            json["title"] = title.empty() ? "Select a file" : title;
         }
         json["action"] = "pick";
     }
     else if (mode == file::PickMode::SaveFile) {
-        json["title"] = "Save...";
+        json["title"] = title.empty() ? "Save..." : title;
         json["action"] = "save";
-        json["name"] = utils::string::pathToString(std::filesystem::path(startPath).filename());
+        json["name"] = asp::fs::Path(startPath).filename()->string();
     }
 
     json["isMultiple"] = isMultiple;
     json["directory"] = startPath;
-    json["filters"] = generateExtensionString(filters);
+    json["filters"] = generateExtensionString(filters, addAllFiles);
 
     Server::get()->sendMessage(json.dump());
 }
@@ -163,8 +168,8 @@ void SoberManager::browseFiles(const std::string& startPath) {
 }
 
 void SoberManager::onFilePicked(const std::vector<std::string>& items) {
-    m_path = std::filesystem::path(items[0]);
-    std::vector<std::filesystem::path> paths;
+    m_path = asp::fs::Path(items[0]);
+    std::vector<asp::fs::Path> paths;
     for (const auto& path : items) {
         paths.push_back(path);
     }
@@ -185,6 +190,7 @@ void SoberManager::setPickerActive(bool active) {
 
     if (active) {
         queueInMainThread([this] {
+            if (!m_pickerActive) return;
 
             std::string label;
             if (m_pickerMode == file::PickMode::OpenFolder) {
@@ -220,11 +226,11 @@ arc::Notified SoberManager::notified() {
     return m_notify.notified();
 }
 
-std::optional<std::filesystem::path> SoberManager::getPath() {
+std::optional<asp::fs::Path> SoberManager::getPath() {
     return m_path;
 }
 
-std::optional<std::vector<std::filesystem::path>> SoberManager::getPaths() {
+std::optional<std::vector<asp::fs::Path>> SoberManager::getPaths() {
     return m_paths;
 }
 

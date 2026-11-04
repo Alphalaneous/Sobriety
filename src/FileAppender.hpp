@@ -1,18 +1,29 @@
 #pragma once
 
+#include <asp/fs/Path.hpp>
 #include <filesystem>
 #include <fstream>
 #include <string>
 #include <mutex>
+#include <asp/fs/std.hpp>
 
 class FileAppender {
 public:
-    FileAppender(const std::filesystem::path& path) {
-        if (path.has_parent_path()) {
-            std::filesystem::create_directories(path.parent_path());
+    FileAppender(asp::fs::PathView path) {
+        if (path.hasParent()) {
+            auto stdParent = path.parent()->toStdPath();
+            if (stdParent) {
+                std::filesystem::create_directories(stdParent.unwrap());
+            }
         }
 
-        m_ofs.open(path, std::ios::out | std::ios::trunc);
+        auto stdPathRes = path.toStdPath();
+        if (!stdPathRes) {
+            geode::log::error("Failed to convert to std path: {}", path.string());
+            return;
+        }
+
+        m_ofs.open(stdPathRes.unwrap(), std::ios::out | std::ios::trunc);
         if (!m_ofs) {
             geode::log::error("Failed to open file: {}", path.string());
         }

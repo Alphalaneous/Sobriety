@@ -1,3 +1,6 @@
+# 1.0.0-beta.11
+- Initial 2.2091 support
+
 # 1.0.0-beta.10
 - Fix a bug where the platform console shows when it shouldn't
 
