@@ -81,7 +81,7 @@ echo "exit_code=$?"
     auto res = utils::file::writeString(bridgeStartDir, bridgeStartScript);
     if (!res) log::error("failed to write starter script");
 
-    auto bridgeDir = getLinuxPath(fmt::format("geode\\unzipped\\{}\\resources\\{}\\bridge", modID, modID));
+    auto bridgeDir = getLinuxPath(fmt::format("geode\\resources\\{}\\bridge", modID));
     auto saveDir = getLinuxPath(Mod::get()->getSaveDir().string());
 
     runCommand(fmt::format("\"{}\" \"{}\" \"{}\"", bridgeStartDir, bridgeDir, saveDir));

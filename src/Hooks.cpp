@@ -89,7 +89,7 @@ std::vector<utils::file::FilePickOptions::Filter> parseFilters(LPOPENFILENAMEA o
         std::string pattern = ptr;
         ptr += pattern.size() + 1;
 
-        std::unordered_set<std::string> files;
+        StringSet files;
         auto split = utils::string::split(pattern, ";");
         for (auto& str : split) {
             files.insert(str);
