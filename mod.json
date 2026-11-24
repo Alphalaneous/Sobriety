@@ -11,7 +11,7 @@
 	"early-load": true,
 	"resources": {
 		"files": [
-			"build/bridge"
+			"resources/bridge"
 		]
 	},
 	"links": {
