@@ -1,3 +1,7 @@
+# 1.0.0-beta.12
+- Fix a crash when closing the game
+- Minor bug fixes
+
 # 1.0.0-beta.11
 - Initial 2.2091 support
 

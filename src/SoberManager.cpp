@@ -2,7 +2,6 @@
 #include <Geode/Geode.hpp>
 #include <asp/fs/Path.hpp>
 #include <asp/fs/fs.hpp>
-#include "Geode/utils/ZStringView.hpp"
 #include "Utils.hpp"
 #include "WaitingPopup.hpp"
 #include "Server.hpp"
@@ -245,6 +244,12 @@ void SoberManager::setConsoleColors() {
         m_logAppender->append(fmt::format("\033]4;243;#{}\007", cc3bToHexString(sobriety::utils::getLogDebugColor([this] {setConsoleColors();}))));
     
         m_logAppender->append("\033[A\033[B"); // forces a refresh
+    }
+}
+
+void SoberManager::append(ZStringView value) {
+    if (m_logAppender) {
+        m_logAppender->append(value);
     }
 }
 

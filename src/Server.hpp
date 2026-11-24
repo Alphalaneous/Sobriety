@@ -6,6 +6,7 @@
 class Server : public sobriety::utils::Singleton<Server> {
 public:
     Server();
+    ~Server();
     void startServer();
     void sendMessage(const std::string& str);
     void close();
@@ -13,5 +14,6 @@ protected:
     void onMessage(const std::string& str);
 
     bool m_closeCalled;
+    bool m_closing;
     std::shared_ptr<ix::WebSocketServer> m_server;
 };

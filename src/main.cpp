@@ -1,5 +1,4 @@
 #include <Geode/Geode.hpp>
-#include <Geode/binding/LocalLevelManager.hpp>
 #include "Server.hpp"
 #include "SoberManager.hpp"
 #include "Utils.hpp"
@@ -14,8 +13,8 @@ $on_game(Exiting) {
 
 $on_mod(Loaded) {
     if (sobriety::utils::isWine()) {
-        SoberManager::get()->startLogger();
         Server::get()->startServer();
+        SoberManager::get()->startLogger();
         SoberManager::get()->startScript();
     }
     else {

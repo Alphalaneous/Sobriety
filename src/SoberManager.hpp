@@ -28,6 +28,7 @@ public:
     std::optional<asp::fs::Path> getPath();
     std::optional<std::vector<asp::fs::Path>> getPaths();
 
+    void append(ZStringView value);
     void setConsoleColors();
     void startLogger();
 

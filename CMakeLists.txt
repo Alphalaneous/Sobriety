@@ -33,3 +33,17 @@ setup_geode_mod(${PROJECT_NAME})
 target_compile_definitions(${PROJECT_NAME} PUBLIC 
     -DWIN32_LEAN_AND_MEAN=1 -DNOMINMAX=1 -D_WINSOCKAPI_=1 -DPSAPI_VERSION=1
 )
+
+include(ExternalProject)
+
+ExternalProject_Add(bridge
+    SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/Bridge"
+    BINARY_DIR "${CMAKE_CURRENT_SOURCE_DIR}/Bridge/build"
+    CMAKE_ARGS 
+        -DCMAKE_RUNTIME_OUTPUT_DIRECTORY=${CMAKE_CURRENT_SOURCE_DIR}/build
+        -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
+    INSTALL_COMMAND ""
+    BUILD_ALWAYS TRUE
+)
+
+add_dependencies(${PROJECT_NAME} bridge)

@@ -1,17 +1,17 @@
 {
-	"geode": "6.0.0-beta.1",
+	"geode": "6.0.0-beta.3",
 	"gd": {
 		"win": "2.2091"
 	},
 	"id": "alphalaneous.sobriety",
 	"name": "Sobriety",
-	"version": "v1.0.0-beta.11",
+	"version": "v1.0.0-beta.12",
 	"developer": "Alphalaneous",
 	"description": "No more Wine file explorer and console!",
 	"early-load": true,
 	"resources": {
 		"files": [
-			"resources/bridge"
+			"build/bridge"
 		]
 	},
 	"links": {

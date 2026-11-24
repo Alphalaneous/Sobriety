@@ -1,5 +1,4 @@
 #include "Server.hpp"
-#include "Geode/loader/Log.hpp"
 #include "SoberManager.hpp"
 #include <ixwebsocket/IXNetSystem.h>
 #include <ixwebsocket/IXWebSocket.h>
@@ -10,6 +9,10 @@ using namespace geode::prelude;
 
 Server::Server() {
     m_server = std::make_shared<ix::WebSocketServer>(20613, "127.0.0.1");
+}
+
+Server::~Server() {
+    close();
 }
 
 void Server::startServer() {
@@ -36,13 +39,19 @@ void Server::sendMessage(const std::string& str) {
 }
 
 void Server::close() {
+    m_closing = true;
+    
     if (m_closeCalled) return;
+    
     matjson::Value value;
     value["type"] = "close";
     sendMessage(value.dump());
+    m_server->stop();
 }
 
 void Server::onMessage(const std::string& str) {
+    if (m_closing) return;
+
     auto jsonRes = matjson::parse(str);
     if (jsonRes.isErr()) return;
 
@@ -108,6 +117,7 @@ void Server::onMessage(const std::string& str) {
 
         Server::get()->sendMessage(json.dump());
 
+        SoberManager::get()->append("\033[2J\033[H");
         SoberManager::get()->setConsoleColors();
     }
 }
